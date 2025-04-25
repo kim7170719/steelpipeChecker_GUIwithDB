@@ -32,15 +32,18 @@
 請先安裝所需 Python 套件：
 
 ```bash
-pip install werkzeug flask fpdf2 opencv-python kivy ultralytics```
+pip install werkzeug flask fpdf2 opencv-python kivy ultralytics
+```
 2️⃣ 啟動 Web.py 雲端資料庫伺服器（每次使用前需啟動）
 此步驟會啟動後端伺服器，負責接收並儲存鋼管檢測結果：
 ```bash
-python web.py```
+python web.py
+```
 3️⃣ 啟動主應用程式（進行影像校正與鋼管檢測）
 啟動圖形介面應用程式後，請依照操作指示進行：
 ```bash
-python SteelPipeDetectorApp.py```
+python SteelPipeDetectorApp.py
+```
 🧪 檢測操作流程
 輸入棋盤格參數並選擇棋盤格照片
 
