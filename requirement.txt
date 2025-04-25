@@ -1,0 +1,1 @@
+pip install werkzeug flask fpdf2 cv2 kivy ultralytics

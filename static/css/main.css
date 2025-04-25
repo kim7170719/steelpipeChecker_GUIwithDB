@@ -1,0 +1,14 @@
+.pdf-btn {
+    background: #dc3545;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
+  
+  .pdf-btn:hover {
+    background: #bb2d3b;
+  }
+  
+  .fa-spinner {
+    margin-right: 8px;

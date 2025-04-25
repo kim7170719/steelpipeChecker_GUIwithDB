@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFU 鋼管檢測系統</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', '微軟正黑體', system-ui, sans-serif;
+            line-height: 1.6;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px 0;
+        }
+
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .header img {
+            height: 50px;
+            margin-right: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+            transition: background 0.2s ease;
+        }
+
+        .image-preview {
+            width: 180px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .image-preview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            background: var(--secondary-color);
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/nfu_logo.png') }}" 
+     alt="NFU校徽"
+     class="header-logo">
+        <h1>NFU 鋼管檢測系統 - 智慧型視覺運算實驗室</h1>
+    </div>
+
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>檢測時間</th>
+                    <th>棋盤格規格</th>
+                    <th>像素/公分</th>
+                    <th>原始圖片</th>
+                    <th>結果圖片</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <span class="badge">{{ record.grid_rows }}x{{ record.grid_cols }}</span>
+                        <span class="text-muted">({{ record.square_size }}cm)</span>
+                    </td>
+                    <td>{{ "%.2f"|format(record.pixels_per_cm) }}</td>
+                    <td>
+                        <img src="{{ url_for('uploaded_file', filename=record.pipe_image) }}" 
+                             class="image-preview" alt="鋼管檢測影像">
+                    </td>
+                    <td>
+                        <a href="/detail/{{ record.id }}">
+                            <img src="{{ url_for('uploaded_file', filename=record.output_image) }}" 
+                                 class="image-preview" alt="分析結果">
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 智慧型視覺運算實驗室 | 國立虎尾科技大學</p>
+    </footer>
+</body>
+</html>

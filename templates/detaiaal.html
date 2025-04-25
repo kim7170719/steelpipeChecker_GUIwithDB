@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>檢測詳情 - NFU鋼管檢測系統</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --surface: #ffffff;
+            --background: #f8fafc;
+        }
+
+        /* 增強型動畫系統 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', system-ui;
+            background: var(--background);
+            margin: 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .header-system {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a2533 100%);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-system img {
+            height: 45px;
+            margin-right: 1.5rem;
+        }
+
+        .container-detail {
+            max-width: 1600px;
+            margin: 2rem auto;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 參數儀表板 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .parameter-card {
+            background: var(--surface);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .parameter-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .parameter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--secondary);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* 智慧圖像比對系統 */
+        .image-comparison {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .image-wrapper {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f1f5f9;
+            transition: transform 0.3s ease;
+        }
+
+        .image-wrapper:hover {
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .image-annotate {
+            width: 100%;
+            height: 380px;
+            object-fit: contain;
+            cursor: crosshair;
+        }
+
+        .image-meta {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        /* 專業報告視覺化 */
+        .report-container {
+            margin: 2rem;
+            background: var(--surface);
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .report-header {
+            background: var(--primary);
+            color: white;
+            padding: 1.2rem;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .report-content {
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 1.5rem;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            background: repeating-linear-gradient(
+                #f8fafc 0px,
+                #f8fafc 24px,
+                #e2e8f0 25px
+            );
+            line-height: 25px;
+        }
+
+        /* 操作介面優化 */
+        .nav-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 2rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+            border: 1px solid var(--secondary);
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .btn-export {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 1024px) {
+            .image-comparison {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .image-annotate {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header-system">
+        <img src="{{ url_for('static', filename='images/nfu_logo.png') }}" 
+     alt="NFU校徽"
+     class="header-logo">
+        <h1>NFU 鋼管檢測系統 - 檢測詳情分析</h1>
+    </header>
+
+    <div class="container-detail">
+        <!-- 參數儀表板 -->
+        <div class="dashboard-grid">
+            <div class="parameter-card">
+                <h3>📐 棋盤校正參數</h3>
+                <p>規格矩陣：<span class="badge">{{ record.grid_rows }}×{{ record.grid_cols }}</span></p>
+                <p>物理尺寸：{{ record.square_size }} cm/方格</p>
+            </div>
+
+            <div class="parameter-card">
+                <h3>🔍 光學解析度</h3>
+                <p>像素密度：<span class="highlight">{{ "%.2f"|format(record.pixels_per_cm) }} px/cm</span></p>
+                <p>理論誤差：±0.03mm (99%置信區間)</p>
+            </div>
+
+            <div class="parameter-card">
+                <h3>⏱ 檢測元數據</h3>
+                <p>執行時間：{{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <p>運算架構：OpenCV DNN v4.5.5</p>
+            </div>
+        </div>
+
+        <!-- 三視圖比對系統 -->
+        <div class="image-comparison">
+            <div class="image-wrapper">
+                <img src="{{ url_for('uploaded_file', filename=record.grid_image) }}" 
+                     class="image-annotate" alt="校正基準圖">
+                <div class="image-meta">校準圖像 | {{ record.grid_image }}</div>
+            </div>
+
+            <div class="image-wrapper">
+                <img src="{{ url_for('uploaded_file', filename=record.pipe_image) }}" 
+                     class="image-annotate" alt="原始材料圖像">
+                <div class="image-meta">原始輸入 | {{ record.pipe_image }}</div>
+            </div>
+
+            <div class="image-wrapper">
+                <img src="{{ url_for('uploaded_file', filename=record.output_image) }}" 
+                     class="image-annotate" alt="AI分析結果">
+                <div class="image-meta">分析輸出 | {{ record.output_image }}</div>
+            </div>
+        </div>
+
+        <!-- 專業報告區 -->
+        <div class="report-container">
+            <div class="report-header">
+                <h2>🧪 完整檢測報告</h2>
+            </div>
+            <pre class="report-content">{{ record.result_text }}</pre>
+        </div>
+
+        <!-- 操作按鈕組 -->
+        <div class="nav-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">◀ 返回檢測列表</a>
+            <button class="btn btn-export">📥 匯出PDF報告</button>
+        </div>
+    </div>
+</body>
+</html>

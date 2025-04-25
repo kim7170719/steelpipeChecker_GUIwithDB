@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>檢測詳情 - 鋼管檢測系統</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-color: #f5f6fa;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .header {
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .info-card h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+
+        .image-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .image-card {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: contain;
+            background: #f0f0f0;
+        }
+
+        .image-label {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .result-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+        }
+
+        .result-text {
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Consolas', monospace;
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: var(--secondary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .back-button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>檢測結果詳情</h1>
+            <p class="timestamp">檢測時間：{{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        </div>
+
+        <!-- 基本參數區 -->
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>棋盤格參數</h3>
+                <p>規格：{{ record.grid_rows }} × {{ record.grid_cols }}</p>
+                <p>方塊尺寸：{{ record.square_size }} cm</p>
+            </div>
+
+            <div class="info-card">
+                <h3>校正結果</h3>
+                <p>像素換算值：{{ "%.2f"|format(record.pixels_per_cm) }} px/cm</p>
+                <p>理論精度：±0.05 mm</p>
+            </div>
+        </div>
+
+        <!-- 圖片展示區 -->
+        <div class="image-section">
+            <div class="image-card">
+                <img src="{{ url_for('uploaded_file', filename=record.grid_image) }}" 
+                     alt="校正用棋盤格">
+                <span class="image-label">校正棋盤格</span>
+            </div>
+
+            <div class="image-card">
+                <img src="{{ url_for('uploaded_file', filename=record.pipe_image) }}" 
+                     alt="原始鋼管圖像">
+                <span class="image-label">原始鋼管圖像</span>
+            </div>
+
+            <div class="image-card">
+                <img src="{{ url_for('uploaded_file', filename=record.output_image) }}" 
+                     alt="檢測結果圖像">
+                <span class="image-label">檢測結果標註</span>
+            </div>
+        </div>
+
+        <!-- 文本結果區 -->
+        <div class="result-section">
+            <h2>完整檢測報告</h2>
+            <div class="result-text">
+                {{ record.result_text }}
+            </div>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="back-button">返回列表</a>
+    </div>
+</body>
+</html>

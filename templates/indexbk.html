@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>鋼管檢測資料庫</title>
+    <style>
+        .container { max-width: 1200px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f5f5f5; }
+        .image-preview { max-width: 200px; height: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>鋼管檢測歷史記錄</h1>
+        <table>
+            <tr>
+                <th>檢測時間</th>
+                <th>棋盤格規格</th>
+                <th>像素/公分</th>
+                <th>原始圖片</th>
+                <th>結果圖片</th>
+            </tr>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ record.grid_rows }}x{{ record.grid_cols }} ({{ record.square_size }}cm)</td>
+                <td>{{ "%.2f"|format(record.pixels_per_cm) }}</td>
+                <td>
+                    <img src="{{ url_for('uploaded_file', filename=record.pipe_image) }}" 
+                         class="image-preview" alt="鋼管圖片">
+                </td>
+                <td>
+                    <a href="/detail/{{ record.id }}">
+                        <img src="{{ url_for('uploaded_file', filename=record.output_image) }}" 
+                             class="image-preview" alt="檢測結果">
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>
