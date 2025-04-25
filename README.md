@@ -55,20 +55,18 @@ python SteelPipeDetectorApp.py
 
 資料將自動上傳至雲端資料庫，完成同步
 
-📦 資源與套件
-Python 3.x
+## 📦 資源與套件
 
-OpenCV (cv2)
+| 套件名稱              | 描述          |
+| -------------------- | ------------- |
+| **Python 3.x**        | 必要的 Python 版本 |
+| **OpenCV (cv2)**      | 開源電腦視覺庫   |
+| **Kivy**              | 用於建立多點觸控應用的框架 |
+| **Flask**             | 輕量級的 Python 網頁框架 |
+| **Werkzeug**          | WSGI 工具庫    |
+| **FPDF2**             | 用於創建 PDF 文件的 Python 套件 |
+| **Ultralytics YOLO**  | 用於目標檢測的深度學習模型 |
 
-Kivy
-
-Flask
-
-Werkzeug
-
-FPDF2
-
-Ultralytics YOLO
 
 🔒 授權與版權聲明
 本專案由 國立虎尾科技大學 電子工程系 智慧影像視覺實驗室 開發，所有原始碼、設計、模型與文檔皆屬該實驗室所有。
