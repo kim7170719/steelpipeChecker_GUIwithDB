@@ -1,159 +1,178 @@
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFU 鋼管檢測系統</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NFU 鋼管檢測系統</title>
+<style>
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --btn-color: #3498db;
+    --btn-hover: #217dbb;
+    --btn-detail: #e67e22;
+    --btn-detail-hover: #d35400;
+}
 
-        body {
-            font-family: 'Segoe UI', '微軟正黑體', system-ui, sans-serif;
-            line-height: 1.6;
-            background: #f8f9fa;
-            margin: 0;
-            padding: 20px 0;
-        }
+body {
+    font-family: 'Segoe UI', '微軟正黑體', system-ui, sans-serif;
+    line-height: 1.6;
+    background: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
 
-        .header {
-            background: var(--primary-color);
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-        }
+.header {
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
 
-        .header img {
-            height: 50px;
-            margin-right: 20px;
-        }
+.header img {
+    height: 50px;
+    margin-right: 20px;
+}
 
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
+.container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    overflow-x: auto;
+    padding: 1rem;
+}
 
-        h1 {
-            margin: 0;
-            font-weight: 600;
-            font-size: 1.8rem;
-        }
+.action-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 1rem;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95rem;
-        }
+.btn-new, .btn-detail {
+    background: var(--btn-color);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin: 0.5rem;
+    display: inline-block;
+}
+.btn-new:hover { background: var(--btn-hover); }
+.btn-detail { background: var(--btn-detail); }
+.btn-detail:hover { background: var(--btn-detail-hover); }
 
-        th {
-            background: var(--primary-color);
-            color: white;
-            padding: 1rem;
-            position: sticky;
-            top: 0;
-            box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
-        }
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+}
 
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid #eee;
-            vertical-align: middle;
-        }
+.card img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
 
-        tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
+.badge {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    background: var(--secondary-color);
+    color: white;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
 
-        tr:hover {
-            background-color: #f1f5f9;
-            transition: background 0.2s ease;
-        }
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    background: #fff;
+    margin-top: 2rem;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
 
-        .image-preview {
-            width: 180px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 4px;
-            transition: transform 0.2s ease;
-        }
+.mobile-notice {
+    background-color: #ffeaa7;
+    padding: 1rem;
+    color: #2d3436;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+}
 
-        .image-preview:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.6rem;
-            border-radius: 20px;
-            background: var(--secondary-color);
-            color: white;
-            font-size: 0.85rem;
-        }
-
-        footer {
-            text-align: center;
-            padding: 1.5rem;
-            color: #666;
-            font-size: 0.9rem;
-        }
-    </style>
+@media (max-width: 768px) {
+    .action-bar {
+        justify-content: center;
+    }
+    .btn-new, .btn-detail {
+        width: 80%;
+        text-align: center;
+    }
+}
+</style>
 </head>
 <body>
-    <div class="header">
-        <img src="{{ url_for('static', filename='images/nfu_logo.png') }}" 
-     alt="NFU校徽"
-     class="header-logo">
-        <h1>NFU 鋼管檢測系統 - 智慧型視覺運算實驗室</h1>
+<div class="header">
+    <img src="{{ url_for('static', filename='images/nfu_logo.png') }}" alt="NFU校徽" class="header-logo">
+    <h1>NFU 鋼管檢測系統 - 智慧型視覺運算實驗室</h1>
+</div>
+
+<div class="container">
+    <div class="action-bar">
+        <a href="{{ url_for('web_detect_form') }}" class="btn-new">使用線上檢測-手機端用戶</a>
     </div>
 
-    <div class="container">
-        <table>
-            <thead>
-                <tr>
-                    <th>檢測時間</th>
-                    <th>棋盤格規格</th>
-                    <th>像素/公分</th>
-                    <th>原始圖片</th>
-                    <th>結果圖片</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in records %}
-                <tr>
-                    <td>{{ record.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
-                    <td>
-                        <span class="badge">{{ record.grid_rows }}x{{ record.grid_cols }}</span>
-                        <span class="text-muted">({{ record.square_size }}cm)</span>
-                    </td>
-                    <td>{{ "%.2f"|format(record.pixels_per_cm) }}</td>
-                    <td>
-                        <img src="{{ url_for('uploaded_file', filename=record.pipe_image) }}" 
-                             class="image-preview" alt="鋼管檢測影像">
-                    </td>
-                    <td>
-                        <a href="/detail/{{ record.id }}">
-                            <img src="{{ url_for('uploaded_file', filename=record.output_image) }}" 
-                                 class="image-preview" alt="分析結果">
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    {% for record in records %}
+    <div class="card">
+        <p><strong>檢測時間：</strong>{{ record.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+        <p><strong>棋盤格規格：</strong> <span class="badge">{{ record.grid_rows }}x{{ record.grid_cols }}</span> ({{ record.square_size }}cm)</p>
+        <p><strong>像素/公分：</strong>{{ "%.2f"|format(record.pixels_per_cm) }}</p>
+        <p><strong>原始圖片：</strong></p>
+        <img src="{{ url_for('uploaded_file', filename=record.pipe_image) }}" alt="鋼管檢測影像">
+        <p><strong>結果圖片：</strong></p>
+        <img src="{{ url_for('uploaded_file', filename=record.output_image) }}" alt="分析結果">
+        <div style="text-align:center;">
+            <a href="{{ url_for('detail', id=record.id) }}" class="btn-detail">查看詳情 ➔</a>
+        </div>
     </div>
+    {% endfor %}
+</div>
 
-    <footer>
-        <p>&copy; 2025 智慧型視覺運算實驗室 | 國立虎尾科技大學</p>
-    </footer>
+<footer>
+    <p>&copy; 2025 智慧型視覺運算實驗室 | 國立虎尾科技大學</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+        const actionBar = document.querySelector('.action-bar');
+        const mobileNotice = document.createElement('div');
+        mobileNotice.className = 'mobile-notice';
+        mobileNotice.innerHTML = '目前使用手機版，建議直接點擊「使用線上檢測-手機端用戶」進行操作。';
+        actionBar.parentNode.insertBefore(mobileNotice, actionBar.nextSibling);
+
+        const detectBtn = document.querySelector('.btn-new');
+        detectBtn.textContent = '前往手機線上檢測 ➔';
+    }
+});
+</script>
 </body>
 </html>
