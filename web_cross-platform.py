@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, send_from_directory  # 匯入 Flask 主要類別與請求/響應工具
+from flask import Flask, request, jsonify, render_template, send_from_directory,url_for,redirect # 匯入 Flask 主要類別與請求/響應工具
 from flask_sqlalchemy import SQLAlchemy  # 匯入 SQLAlchemy 擴充套件，用於 ORM
 from datetime import datetime  # 匯入 datetime，用於時間戳記
 import os  # 匯入 os，用於檔案與目錄操作
@@ -7,8 +7,11 @@ from werkzeug.utils import secure_filename  # 匯入 secure_filename，確保上
 from fpdf import FPDF  # 匯入 FPDF 類別，用於產生 PDF
 from fpdf.enums import XPos, YPos  # 匯入 PDF 位置列舉
 import platform  # 匯入 platform，用於檢查作業系統
-
+import cv2, numpy as np, base64
+from ultralytics import YOLO
+from SteelPipeDetectorApp import detect_chessboard_calibration, detect_inner_circle_advanced
 # 建立 Flask 應用實例
+model = YOLO('best.pt')
 app = Flask(__name__)  # __name__ 指定模組名稱，讓 Flask 知道資源路徑
 # 設定 SQLite 資料庫路徑
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///steel_pipe.db'  # 設定 ORM 連接字串
@@ -24,7 +27,10 @@ PDF_FONT_PATH = 'msjh.ttc' if platform.system() == 'Windows' else '/usr/share/fo
 # 設定 PDF 報告存放資料夾
 PDF_SAVE_DIR = os.path.join('static', 'pdf_reports')  # 組合靜態目錄與 PDF 子目錄
 os.makedirs(PDF_SAVE_DIR, exist_ok=True)  # 若報告資料夾不存在，則建立
-
+#手機端上傳占存保留
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# 定義產生 PDF 的類別，繼承自 FPDF
 # 定義產生 PDF 的類別，繼承自 FPDF
 class SteelPipePDF(FPDF):
     PAGE_MARGIN = 10  # 頁邊距 10mm
@@ -126,12 +132,12 @@ class SteelPipePDF(FPDF):
         self.set_font('MSJH','',11)  # 正常字 11pt
         self.set_text_color(0,0,0)  # 黑字
         self.multi_cell(0, 6, self.record.result_text or '無說明內容')  # 多行文字
-        self.ln(5)  # 換行 5mm
+        self.ln(50)  # 換行 5mm
 
     def _add_images(self):  # 內部方法：插入圖片
         # 圖片依序：grid_image, pipe_image, output_image
         imgs = [  # 標題與檔名對照
-            ('格子參考圖', self.record.grid_image),
+            ('棋盤格', self.record.grid_image),
             ('原圖', self.record.pipe_image),
             ('檢測輸出', self.record.output_image)
         ]
@@ -169,6 +175,7 @@ class SteelPipePDF(FPDF):
         self.ln(self.section_gap)  # 換行指定間距
 
 # 定義生成 PDF 的路由
+
 @app.route('/export_pdf/<int:id>')
 def export_pdf(id):  # 匯出 PDF 並下載
     try:
@@ -196,7 +203,128 @@ class DetectionRecord(db.Model):  # ORM 類別
     grid_image = db.Column(db.String(200))  # Grid 參考圖檔名
     pipe_image = db.Column(db.String(200))  # 原圖檔名
     output_image = db.Column(db.String(200))  # 輸出圖檔名
+#------------------------------Phone
+# 理論值列表，用於尺寸校正
+THEORY_OUTER = [20, 12, 10]
+THEORY_INNER_MAP = {
+    20: [10, 15, 12, 14],
+    12: [6, 7],
+    10: [6]
+}
 
+# 保存原始 bytes 檔案輔助函式
+def save_bytes(data: bytes, prefix: str) -> str:
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    filename = secure_filename(f"{prefix}_{timestamp}.jpg")
+    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    with open(path, 'wb') as f:
+        f.write(data)
+    return filename
+
+# GET: 檢測表單
+@app.route('/web_detect', methods=['GET'])
+def web_detect_form():
+    return render_template('detect_form.html')
+
+# POST: 執行檢測並跳轉到 detail
+@app.route('/web_detect', methods=['POST'])
+def web_detect_process():
+    # 讀取參數
+    rows = int(request.form['grid_rows'])
+    cols = int(request.form['grid_cols'])
+    square_size = float(request.form['square_size'])
+
+    # 讀取原始檔 bytes
+    grid_file = request.files['grid_image']
+    pipe_file = request.files['pipe_image']
+    grid_bytes = grid_file.read()
+    pipe_bytes = pipe_file.read()
+
+    # 解碼成 OpenCV 影像
+    grid_arr = np.frombuffer(grid_bytes, np.uint8)
+    grid_img = cv2.imdecode(grid_arr, cv2.IMREAD_COLOR)
+    pipe_arr = np.frombuffer(pipe_bytes, np.uint8)
+    pipe_img = cv2.imdecode(pipe_arr, cv2.IMREAD_COLOR)
+
+    # 存儲原始檔
+    grid_filename = save_bytes(grid_bytes, 'grid')
+    pipe_filename = save_bytes(pipe_bytes, 'pipe')
+
+    # 校正
+    pixels_per_cm, _ = detect_chessboard_calibration(
+        grid_img, pattern_size=(cols, rows), square_size_cm=square_size
+    )
+
+    # YOLO 推論
+    results = model.predict(pipe_img, imgsz=640, conf=0.5)
+    boxes = results[0].boxes.xyxy.cpu().numpy()
+
+    # 標註並計算尺寸
+    annotated = pipe_img.copy()
+    detection_text = ''
+    for i, box in enumerate(boxes, start=1):
+        x1, y1, x2, y2 = map(int, box)
+        roi = pipe_img[y1:y2, x1:x2]
+        cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
+        r_outer = (x2 - x1) // 2
+
+        # 偵測內圈
+        inner = detect_inner_circle_advanced(
+            roi, (roi.shape[1]//2, roi.shape[0]//2, r_outer)
+        )
+        ir = inner[2] if inner else int(r_outer * 0.7)
+
+        # 換算成 mm
+        outer_mm = (2 * r_outer / pixels_per_cm) * 10
+        inner_mm = (2 * ir / pixels_per_cm) * 10
+
+        # 理論值修正
+        corrected_outer = min(THEORY_OUTER, key=lambda x: abs(x - outer_mm))
+        inner_candidates = THEORY_INNER_MAP.get(corrected_outer, [])
+        if inner_candidates:
+            corrected_inner = min(inner_candidates, key=lambda x: abs(x - inner_mm))
+        else:
+            corrected_inner = inner_mm
+        outer_mm = corrected_outer
+        inner_mm = corrected_inner
+
+        # 壁厚計算
+        wall_mm = (outer_mm - inner_mm) / 2
+
+        detection_text += (
+            f"Pipe {i}: 外徑={outer_mm:.1f}mm 內徑={inner_mm:.1f}mm 壁厚={wall_mm:.1f}mm\n"
+        )
+
+        # 繪製標註
+        cv2.circle(annotated, (cx, cy), r_outer, (255, 0, 0), 4)
+        cv2.circle(annotated, (cx, cy), ir, (0, 0, 255), 4)
+        cv2.putText(
+            annotated, str(i), (x1, y1 - 10),
+            cv2.FONT_HERSHEY_SIMPLEX, 2.5, (0, 255, 0), 5
+        )
+
+    # 存標註結果圖 bytes
+    _, buf = cv2.imencode('.jpg', annotated)
+    output_bytes = buf.tobytes()
+    output_filename = save_bytes(output_bytes, 'output')
+
+    # 建立並存入資料庫記錄
+    record = DetectionRecord(
+        grid_rows=cols,
+        grid_cols=rows,
+        square_size=square_size,
+        pixels_per_cm=pixels_per_cm,
+        result_text=detection_text,
+        grid_image=grid_filename,
+        pipe_image=pipe_filename,
+        output_image=output_filename
+    )
+    db.session.add(record)
+    db.session.commit()
+
+    # 轉向既有 detail 頁面
+    return redirect(url_for('detail', id=record.id))
+#-----------------
 # 關鍵修復：同時保留新舊路由
 @app.route('/api/static/uploads', methods=['POST'])  # 舊路由兼容
 @app.route('/api/upload', methods=['POST'])          # 新標準路由
@@ -244,7 +372,10 @@ def index():
 def detail(id):
     record = DetectionRecord.query.get_or_404(id)  # 取得或 404
     return render_template('detail.html', record=record)  # 傳入單筆記錄
-
+@app.route('/upload_form', methods=['GET'])
+def upload_form():
+    """提供一個 HTML 表單，讓手機、電腦瀏覽器都能上傳資料。"""
+    return render_template('upload.html')
 # 啟動應用
 if __name__ == '__main__':
     with app.app_context():  # 建立應用上下文
